@@ -35,7 +35,7 @@ final class ConferenceController
         ]);
     }
 
-    #[Route('/conference/{id}', name: 'conference')]
+    #[Route('/conference/{slug:conference}', name: 'conference')]
     public function show(
         Conference $conference,
         #[MapQueryParameter]
