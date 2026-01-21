@@ -5,32 +5,44 @@ namespace App\Controller;
 use App\Entity\Conference;
 use App\Repository\CommentRepository;
 use App\Repository\ConferenceRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\ControllerHelper;
+use Symfony\Component\DependencyInjection\Attribute\AutowireCallable;
+use Symfony\Component\DependencyInjection\Attribute\AutowireMethodOf;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class ConferenceController extends AbstractController
+final class ConferenceController
 {
+    public function __construct(
+        #[AutowireMethodOf(ControllerHelper::class)]
+        private \Closure $render,
+
+        #[AutowireMethodOf(CommentRepository::class)]
+        private \Closure $getCommentPaginator,
+    ) {
+    }
+
     #[Route('/', name: 'homepage')]
-    public function index(ConferenceRepository $conferenceRepository): Response
+    public function index(
+        #[AutowireCallable(service: ConferenceRepository::class, method: 'findAll')]
+        \Closure $findAllConferences,
+    ): Response
     {
-        return $this->render('conference/index.html.twig', [
-            'conferences' => $conferenceRepository->findAll(),
+        return ($this->render)('conference/index.html.twig', [
+            'conferences' => ($findAllConferences)(),
         ]);
     }
 
     #[Route('/conference/{id}', name: 'conference')]
     public function show(
         Conference $conference,
-        CommentRepository $commentRepository,
         #[MapQueryParameter]
         int $offset = 0
     ): Response
     {
-        $paginator = $commentRepository->getCommentPaginator($conference, $offset);
-
-        return $this->render('conference/show.html.twig', [
+        $paginator = ($this->getCommentPaginator)($conference, $offset);
+        return ($this->render)('conference/show.html.twig', [
             'conference' => $conference,
             'comments' => $paginator,
             'previous' => $offset - CommentRepository::COMMENTS_PER_PAGE,
