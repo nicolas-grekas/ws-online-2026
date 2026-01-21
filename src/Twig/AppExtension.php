@@ -11,15 +11,8 @@ class AppExtension
 {
     public function __construct(
         private ConferenceRepository $conferenceRepository,
-
-        #[AutowireIterator(FooInterface::class)]
-        iterable $fooServices,
     )
     {
-        dump($fooServices);
-        foreach ($fooServices as $service) {
-            dump($service);
-        }
     }
 
     #[AsTwigFunction('conferences')]
