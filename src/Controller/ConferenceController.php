@@ -18,6 +18,9 @@ final class ConferenceController
         #[AutowireMethodOf(ControllerHelper::class)]
         private \Closure $render,
 
+        #[AutowireCallable(service: ConferenceRepository::class, method: 'findAll')]
+        private \Closure $findAllConferences,
+
         #[AutowireMethodOf(CommentRepository::class)]
         private \Closure $getCommentPaginator,
     ) {
@@ -25,12 +28,10 @@ final class ConferenceController
 
     #[Route('/', name: 'homepage')]
     public function index(
-        #[AutowireCallable(service: ConferenceRepository::class, method: 'findAll')]
-        \Closure $findAllConferences,
     ): Response
     {
         return ($this->render)('conference/index.html.twig', [
-            'conferences' => ($findAllConferences)(),
+            'conferences' => ($this->findAllConferences)(),
         ]);
     }
 
